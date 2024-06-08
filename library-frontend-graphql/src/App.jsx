@@ -2,7 +2,6 @@ import { useState } from 'react'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
-import UpdateAuthor from './components/UpdateAuthor'
 
 const App = () => {
   const [page, setPage] = useState('authors')
@@ -13,7 +12,6 @@ const App = () => {
         <button onClick={() => setPage('authors')}>Authors</button>
         <button onClick={() => setPage('books')}>Books</button>
         <button onClick={() => setPage('add')}>Add book</button>
-        <button onClick={() => setPage('update-author')}>Update Author</button>
       </div>
 
       <Authors show={page === 'authors'} />
@@ -22,7 +20,6 @@ const App = () => {
 
       <NewBook show={page === 'add'} />
 
-      <UpdateAuthor show={page === 'update-author'} />
     </div>
   )
 }
