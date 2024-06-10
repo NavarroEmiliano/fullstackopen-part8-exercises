@@ -56,14 +56,11 @@ const resolvers = {
         return allBooks
       }
 
-      const filteredBooks = books.filter(book => {
-        const authorMatch = !args.author || book.author === args.author
-        const genreMatch = !args.genre || book.genres.includes(args.genre)
-
-        return authorMatch && genreMatch
+      const booksFound = await Book.find({
+        genres: { $in: [args.genre] }
       })
 
-      return filteredBooks > 0 ? filteredBooks : null
+      return booksFound
     },
     allAuthors: async () => {
       const allAuthors = await Author.find({})
