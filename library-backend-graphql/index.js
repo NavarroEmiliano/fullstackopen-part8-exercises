@@ -45,7 +45,10 @@ const typeDefs = `
 
 const resolvers = {
   Query: {
-    //  bookCount: () => books.length,
+     bookCount: async () => {
+      const allBooks = await Book.find({})
+      return allBooks.length
+     },
     //  authorCount: () => authors.length,
     allBooks: async (_, args) => {
       if (!args.author && !args.genre) {
