@@ -45,10 +45,10 @@ const typeDefs = `
 
 const resolvers = {
   Query: {
-     bookCount: async () => {
+    bookCount: async () => {
       const allBooks = await Book.find({})
       return allBooks.length
-     },
+    },
     //  authorCount: () => authors.length,
     allBooks: async (_, args) => {
       if (!args.author && !args.genre) {
@@ -65,7 +65,7 @@ const resolvers = {
 
       return filteredBooks > 0 ? filteredBooks : null
     },
-    allAuthors:async () => {
+    allAuthors: async () => {
       const allAuthors = await Author.find({})
       return allAuthors
     }
@@ -76,12 +76,12 @@ const resolvers = {
     } */
   },
   Book: {
-    author:async root => {
+    author: async root => {
       const author = await Author.findById(root.author)
       return {
         name: () => author.name,
         id: () => author.id,
-        born: () => author.born,
+        born: () => author.born
       }
     }
   },
@@ -105,15 +105,14 @@ const resolvers = {
       author.save()
       return author
     },
-    editAuthor: (_, args) => {
-      /*       const author = authors.find(a => a.name === args.name)
+    editAuthor: async (_, args) => {
+      const author = await Author.findOne({ name: args.name })
       if (!author) {
         return null
       }
-
-      const modifiquedAuthor = { ...author, born: args.setBornTo }
-      authors = authors.map(a => (a.name === args.name ? modifiquedAuthor : a))
-      return modifiquedAuthor */
+      author.born = args.setBornTo
+      await author.save()
+      return author
     }
   }
 }
