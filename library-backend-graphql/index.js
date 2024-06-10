@@ -108,12 +108,24 @@ const resolvers = {
     }
   },
   Mutation: {
-    addBook: async (_, args) => {
+    addBook: async (_, args, { currentUser }) => {
       try {
-        if (args.author.length < 4)
-          throw Error('Author must be more than 3 letters')
-        if (args.title.length < 2)
-          throw Error('Title must be more than 1 letters')
+        if (!currentUser) {
+          throw new GraphQLError('User is not authenticated', {
+            extensions: {
+              code: 'UNAUTHENTICATED'
+            }
+          })
+        }
+
+        if (args.author.length < 4) {
+          throw new GraphQLError('Author must be more than 3 letters')
+        }
+
+        if (args.title.length < 2) {
+          throw new GraphQLError('Title must be more than 1 letters')
+        }
+
         let author = await Author.findOne({ name: args.author })
         if (!author) {
           author = new Author({ name: args.author })
@@ -139,8 +151,15 @@ const resolvers = {
       author.save()
       return author
     },
-    editAuthor: async (_, args) => {
+    editAuthor: async (_, args,{currentUser}) => {
       try {
+        if (!currentUser) {
+          throw new GraphQLError('User is not authenticated', {
+            extensions: {
+              code: 'UNAUTHENTICATED'
+            }
+          })
+        }
         const author = await Author.findOne({ name: args.name })
         if (!author) {
           return null
