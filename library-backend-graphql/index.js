@@ -6,6 +6,7 @@ import './db/index.js'
 import Book from './models/book.js'
 import Author from './models/author.js'
 import User from './models/user.js'
+import jwt from 'jsonwebtoken'
 
 const typeDefs = `
   type User {
@@ -86,6 +87,9 @@ const resolvers = {
     allAuthors: async () => {
       const allAuthors = await Author.find({})
       return allAuthors
+    },
+    me: (_, args, { currentUser }) => {
+      return currentUser
     }
   },
   Author: {
@@ -153,9 +157,9 @@ const resolvers = {
         })
       }
     },
-    createUser: async(_,args) =>{
+    createUser: async (_, args) => {
       try {
-        const user = new User({...args})
+        const user = new User({ ...args })
         await user.save()
         return user
       } catch (error) {
@@ -166,6 +170,22 @@ const resolvers = {
           }
         })
       }
+    },
+    login: async (_, args) => {
+      const user = await User.findOne({ username: args.username })
+      if (!user || args.password !== 'secret') {
+        throw new GraphQLError('wrong credentials', {
+          extensions: {
+            code: 'BAD_USER_INPUT'
+          }
+        })
+      }
+      const userForToken = {
+        username: user.username,
+        id: user._id
+      }
+
+      return { value: jwt.sign(userForToken, process.env.JWT_SECRET) }
     }
   }
 }
@@ -176,6 +196,14 @@ const server = new ApolloServer({
 })
 
 const { url } = await startStandaloneServer(server, {
-  listen: { port: 4000 }
+  listen: { port: 4000 },
+  context: async ({ req, res }) => {
+    const auth = req ? req.headers.authorization : null
+    if (auth && auth.toLowerCase().startsWith('bearer ')) {
+      const decodedToken = jwt.verify(auth.substring(7), process.env.JWT_SECRET)
+      const currentUser = await User.findById(decodedToken.id)
+      return { currentUser }
+    }
+  }
 })
 console.log(`Server ready at ${url}`)
