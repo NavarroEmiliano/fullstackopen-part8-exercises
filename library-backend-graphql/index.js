@@ -1,5 +1,6 @@
 import { ApolloServer } from '@apollo/server'
 import { startStandaloneServer } from '@apollo/server/standalone'
+import { GraphQLError } from 'graphql'
 import 'dotenv/config'
 import './db/index.js'
 import Book from './models/book.js'
@@ -84,17 +85,29 @@ const resolvers = {
   },
   Mutation: {
     addBook: async (_, args) => {
-      let author = await Author.findOne({ name: args.author })
-      if (!author) {
-        author = new Author({ name: args.author })
-        await author.save()
+      try {
+        if (args.author.length < 4)
+          throw Error('Author must be more than 3 letters')
+        if (args.title.length < 2)
+          throw Error('Title must be more than 1 letters')
+        let author = await Author.findOne({ name: args.author })
+        if (!author) {
+          author = new Author({ name: args.author })
+          await author.save()
+        }
+        const book = new Book({ ...args, author: author._id })
+        await book.save()
+        const bookWithAuthor = await Book.findById(book._id).populate('author')
+
+        return bookWithAuthor
+      } catch (error) {
+        throw new GraphQLError(error.message, {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args
+          }
+        })
       }
-      const book = new Book({ ...args, author: author._id })
-      await book.save()
-
-      const bookWithAuthor = await Book.findById(book._id).populate('author')
-
-      return bookWithAuthor
     },
 
     addAuthor: (_, args) => {
@@ -103,13 +116,22 @@ const resolvers = {
       return author
     },
     editAuthor: async (_, args) => {
-      const author = await Author.findOne({ name: args.name })
-      if (!author) {
-        return null
+      try {
+        const author = await Author.findOne({ name: args.name })
+        if (!author) {
+          return null
+        }
+        author.born = args.setBornTo
+        await author.save()
+        return author
+      } catch (error) {
+        throw new GraphQLError(error.message, {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args
+          }
+        })
       }
-      author.born = args.setBornTo
-      await author.save()
-      return author
     }
   }
 }
