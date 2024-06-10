@@ -64,8 +64,11 @@ const resolvers = {
       })
 
       return filteredBooks > 0 ? filteredBooks : null
+    },
+    allAuthors:async () => {
+      const allAuthors = await Author.find({})
+      return allAuthors
     }
-    //  allAuthors: () => authors
   },
   Author: {
     /*     bookCount: root => {
