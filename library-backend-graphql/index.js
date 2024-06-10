@@ -5,8 +5,19 @@ import 'dotenv/config'
 import './db/index.js'
 import Book from './models/book.js'
 import Author from './models/author.js'
+import User from './models/user.js'
 
 const typeDefs = `
+  type User {
+    username: String!
+    favoriteGenre: String!
+    id: ID!
+  }
+  
+  type Token {
+  value: String!
+}
+
   type Author {
     name: String!
     id: ID!
@@ -27,6 +38,7 @@ const typeDefs = `
     authorCount : Int!
     allBooks(author:String,genre:String): [Book!]!
     allAuthors: [Author!]!
+    me: User
   }
 
   type Mutation {
@@ -41,6 +53,14 @@ const typeDefs = `
        name: String!
       born: Int
     ): Author
+    createUser(
+    username: String!
+    favoriteGenre: String!
+  ): User
+  login(
+    username: String!
+    password: String!
+  ): Token
   }
 `
 
@@ -124,6 +144,20 @@ const resolvers = {
         author.born = args.setBornTo
         await author.save()
         return author
+      } catch (error) {
+        throw new GraphQLError(error.message, {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args
+          }
+        })
+      }
+    },
+    createUser: async(_,args) =>{
+      try {
+        const user = new User({...args})
+        await user.save()
+        return user
       } catch (error) {
         throw new GraphQLError(error.message, {
           extensions: {
