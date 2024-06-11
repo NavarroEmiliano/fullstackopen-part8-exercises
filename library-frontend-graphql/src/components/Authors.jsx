@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client'
-import { ALL_AUTHORS, ALL_BOOKS, EDIT_AUTHOR } from '../queries'
+import { ALL_AUTHORS, EDIT_AUTHOR } from '../queries'
 import { useState } from 'react'
 import Select from 'react-select'
 
@@ -69,27 +69,29 @@ const Authors = props => {
           ))}
         </tbody>
       </table>
-      {props.token ? (
-        <>
-          <h2>Set birthyear</h2>
-          <form onSubmit={submit}>
-            <Select
-              options={options}
-              onChange={({ value }) => setName(value)}
-            />
-            <div>
-              Born{' '}
-              <input
-                value={born}
-                onChange={({ target }) => setBorn(target.value)}
+      {props.token
+        ? (
+          <>
+            <h2>Set birthyear</h2>
+            <form onSubmit={submit}>
+              <Select
+                options={options}
+                onChange={({ value }) => setName(value)}
               />
-            </div>
-            <button type='submit'>Update Author</button>
-          </form>
-        </>
-      ) : (
-        ''
-      )}
+              <div>
+                Born{' '}
+                <input
+                  value={born}
+                  onChange={({ target }) => setBorn(target.value)}
+                />
+              </div>
+              <button type='submit'>Update Author</button>
+            </form>
+          </>
+          )
+        : (
+            ''
+          )}
     </div>
   )
 }
