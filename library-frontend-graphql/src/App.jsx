@@ -51,7 +51,7 @@ const App = () => {
 
       <Authors show={page === 'authors'} token={token} />
 
-      <Books show={page === 'books'} />
+      <Books show={page === 'books'} notify={notify} />
 
       <NewBook show={page === 'add'} notify={notify} />
 

@@ -19,6 +19,9 @@ const Recommended = props => {
         b.genres.includes(userData.me.favoriteGenre)
       )
       : ''
+  if (errorUser || errorBooks) {
+    props.notify(errorUser || errorBooks)
+  }
 
   if (!props.show) return null
 
