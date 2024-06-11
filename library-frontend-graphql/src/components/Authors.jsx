@@ -9,7 +9,15 @@ const Authors = props => {
 
   const { loading, error, data } = useQuery(ALL_AUTHORS)
   const [editAuthor] = useMutation(EDIT_AUTHOR, {
-    refetchQueries: [{ query: ALL_AUTHORS }, { query: ALL_BOOKS }]
+    update: (cache, { data: { editAuthor } }) => {
+      cache.updateQuery({ query: ALL_AUTHORS }, ({ allAuthors }) => {
+        return {
+          allAuthors: allAuthors.map(a =>
+            a.name !== editAuthor.name ? a : editAuthor
+          )
+        }
+      })
+    }
   })
 
   const authors = data?.allAuthors && [...data.allAuthors]
@@ -61,19 +69,27 @@ const Authors = props => {
           ))}
         </tbody>
       </table>
-      <h2>Set birthyear</h2>
-      <form onSubmit={submit}>
-        <Select options={options} onChange={({ value }) => setName(value)}/>
-
-        <div>
-          Born{' '}
-          <input
-            value={born}
-            onChange={({ target }) => setBorn(target.value)}
-          />
-        </div>
-        <button type='submit'>Update Author</button>
-      </form>
+      {props.token ? (
+        <>
+          <h2>Set birthyear</h2>
+          <form onSubmit={submit}>
+            <Select
+              options={options}
+              onChange={({ value }) => setName(value)}
+            />
+            <div>
+              Born{' '}
+              <input
+                value={born}
+                onChange={({ target }) => setBorn(target.value)}
+              />
+            </div>
+            <button type='submit'>Update Author</button>
+          </form>
+        </>
+      ) : (
+        ''
+      )}
     </div>
   )
 }

@@ -10,7 +10,28 @@ const NewBook = props => {
   const [genres, setGenres] = useState([])
 
   const [addBook] = useMutation(ADD_BOOK, {
-    refetchQueries: [{ query: ALL_AUTHORS }, { query: ALL_BOOKS }]
+    onError: error => {
+      const message = error.graphQLErrors[0].message
+      props.notify(message)
+    },
+    update: (cache, response) => {
+      cache.updateQuery({ query: ALL_AUTHORS }, ({ allAuthors }) => {
+        const updatedAuthors = allAuthors.some(
+          a => a.name === response.data.addBook.author.name
+        )
+          ? allAuthors
+          : allAuthors.concat(response.data.addBook.author)
+        return {
+          allAuthors: updatedAuthors
+        }
+      })
+
+      cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
+        return {
+          allBooks: allBooks.concat(response.data.addBook)
+        }
+      })
+    }
   })
 
   if (!props.show) {
@@ -45,21 +66,21 @@ const NewBook = props => {
     <div>
       <form onSubmit={submit}>
         <div>
-          Title {' '}
+          Title{' '}
           <input
             value={title}
             onChange={({ target }) => setTitle(target.value)}
           />
         </div>
         <div>
-          Author {' '}
+          Author{' '}
           <input
             value={author}
             onChange={({ target }) => setAuthor(target.value)}
           />
         </div>
         <div>
-          Published {' '}
+          Published{' '}
           <input
             type='number'
             value={published}
