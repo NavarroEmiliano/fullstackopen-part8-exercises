@@ -29,7 +29,6 @@ const Login = props => {
     return null
   }
 
-
   return (
     <div>
       <h2>Login</h2>

@@ -1,6 +1,7 @@
 import { useLazyQuery, useQuery } from '@apollo/client'
 import { ALL_BOOKS, ALL_BOOKS_BY_GENRE } from '../queries'
 import { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
 
 const Books = props => {
   const [genre, setGenre] = useState(null)
@@ -14,7 +15,7 @@ const Books = props => {
   }, [genre]) // eslint-disable-line
 
   if (error) {
-    props.notify(error)
+    toast.error(error.message)
   }
 
   if (!props.show) {

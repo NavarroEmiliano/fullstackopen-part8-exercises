@@ -1,11 +1,9 @@
 import { useMutation } from '@apollo/client'
 import { useState } from 'react'
 import {
-  ADD_BOOK,
-  ALL_AUTHORS,
-  ALL_BOOKS,
-  ALL_BOOKS_BY_GENRE
+  ADD_BOOK
 } from '../queries'
+import { toast } from 'react-toastify'
 
 const NewBook = props => {
   const [title, setTitle] = useState('')
@@ -17,36 +15,7 @@ const NewBook = props => {
   const [addBook] = useMutation(ADD_BOOK, {
     onError: error => {
       const message = error.graphQLErrors[0].message
-      props.notify(message)
-    },
-    update: (cache, response) => {
-      cache.updateQuery({ query: ALL_AUTHORS }, ({ allAuthors }) => {
-        const updatedAuthors = allAuthors.some(
-          a => a.name === response.data.addBook.author.name
-        )
-          ? allAuthors
-          : allAuthors.concat(response.data.addBook.author)
-        return {
-          allAuthors: updatedAuthors
-        }
-      })
-
-      cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
-        return {
-          allBooks: allBooks.concat(response.data.addBook)
-        }
-      })
-
-      response.data.addBook.genres.forEach(genre => {
-        cache.updateQuery(
-          { query: ALL_BOOKS_BY_GENRE, variables: { genre } },
-          data => {
-            if (data) {
-              return { allBooks: data.allBooks.concat(addBook) }
-            }
-          }
-        )
-      })
+      toast.error(message)
     }
   })
 

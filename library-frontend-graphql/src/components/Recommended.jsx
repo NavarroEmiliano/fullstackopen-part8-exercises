@@ -1,5 +1,6 @@
 import { useQuery } from '@apollo/client'
 import { ALL_BOOKS, USER_LOGGED } from '../queries'
+import { toast } from 'react-toastify'
 
 const Recommended = props => {
   const {
@@ -20,7 +21,7 @@ const Recommended = props => {
       )
       : ''
   if (errorUser || errorBooks) {
-    props.notify(errorUser || errorBooks)
+    toast.error(errorUser || errorBooks)
   }
 
   if (!props.show) return null
