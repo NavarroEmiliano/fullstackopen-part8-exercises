@@ -111,9 +111,9 @@ const resolvers = {
     }
   },
   Author: {
-    /*     bookCount: root => {
-      return books.filter(b => b.author === root.name).length
-    } */
+    bookCount: root => {
+      return root.bookCount.length
+    }
   },
   Book: {
     author: async root => {
@@ -147,9 +147,10 @@ const resolvers = {
         let author = await Author.findOne({ name: args.author })
         if (!author) {
           author = new Author({ name: args.author })
-          await author.save()
         }
         const book = new Book({ ...args, author: author._id })
+        author.bookCount = author.bookCount.concat(book)
+        await author.save()
         await book.save()
         const bookWithAuthor = await Book.findById(book._id).populate('author')
 
