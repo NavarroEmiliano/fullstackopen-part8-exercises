@@ -3,13 +3,13 @@ import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import Login from './components/Login'
-import { useApolloClient } from '@apollo/client'
-import Notify from './components/Notify'
+import { useApolloClient, useSubscription } from '@apollo/client'
 import Recommended from './components/Recommended'
+import { BOOK_ADDED } from './queries'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const App = () => {
-  const [errorMessage, setErrorMessage] = useState(null)
-
   const [page, setPage] = useState('authors')
   const [token, setToken] = useState(() =>
     localStorage.getItem('library-app-user')
@@ -17,36 +17,37 @@ const App = () => {
 
   const client = useApolloClient()
 
+  useSubscription(BOOK_ADDED, {
+    onData: ({ data }) => {
+      if (data.data.bookAdded.title) {
+        notify('New book holis')
+      }
+    },
+  })
+
   const logout = () => {
     setToken(null)
     localStorage.clear()
     client.resetStore()
   }
 
-  const notify = message => {
-    setErrorMessage(message)
-    setTimeout(() => {
-      setErrorMessage(null)
-    }, 10000)
-  }
+  const notify = message => toast(message)
 
   return (
     <div>
-      <Notify errorMessage={errorMessage} />
+      <ToastContainer />
       <div>
         <button onClick={() => setPage('authors')}>Authors</button>
         <button onClick={() => setPage('books')}>Books</button>
-        {!token
-          ? (
-            <button onClick={() => setPage('login')}>Login</button>
-            )
-          : (
-            <>
-              <button onClick={() => setPage('add')}>Add book</button>
-              <button onClick={() => setPage('recommended')}>Recommended</button>
-              <button onClick={logout}>Logout</button>
-            </>
-            )}
+        {!token ? (
+          <button onClick={() => setPage('login')}>Login</button>
+        ) : (
+          <>
+            <button onClick={() => setPage('add')}>Add book</button>
+            <button onClick={() => setPage('recommended')}>Recommended</button>
+            <button onClick={logout}>Logout</button>
+          </>
+        )}
       </div>
 
       <Authors show={page === 'authors'} token={token} />

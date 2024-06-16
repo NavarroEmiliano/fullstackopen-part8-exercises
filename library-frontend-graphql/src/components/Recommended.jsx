@@ -14,7 +14,7 @@ const Recommended = props => {
   } = useQuery(ALL_BOOKS)
 
   const recommendedBooks =
-    booksData && userData
+    booksData && userData.me
       ? booksData.allBooks.filter(b =>
         b.genres.includes(userData.me.favoriteGenre)
       )

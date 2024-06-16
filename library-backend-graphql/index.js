@@ -261,10 +261,15 @@ const wsServer = new WebSocketServer({
 
 const serverCleanup = useServer({ schema }, wsServer)
 
+const corsOptions = {
+  origin: 'http://localhost:5173'
+}
+
+app.use(cors(corsOptions))
+
 await server.start()
 app.use(
   '/graphql',
-  cors(),
   express.json(),
   expressMiddleware(server, {
     context: async ({ req, res }) => {
